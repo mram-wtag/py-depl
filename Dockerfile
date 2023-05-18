@@ -20,6 +20,6 @@ COPY . .
 
 RUN chmod +x ./manage.py
 
-#ENTRYPOINT ["python", "manage.py"]
-#EXPOSE 8000
-#CMD ["runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["python", "manage.py"]
+EXPOSE 8000
+CMD ["runserver", "0.0.0.0:8000"]
