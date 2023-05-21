@@ -19,5 +19,5 @@ services:
 
 networks:
   py-db:
-    driver: bridge
+    external: true
 

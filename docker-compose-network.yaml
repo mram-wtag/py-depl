@@ -2,4 +2,6 @@ version: '3.1'
 
 networks:
   py-app:
+    driver: bridge
   py-db:
+    driver: bridge
