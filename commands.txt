@@ -1,0 +1,23 @@
+Run using docker commands:
+docker-compose -f docker-compose-app.yaml -f docker-compose-db.yaml -f docker-compose-network.yaml up
+
+
+
+Helm Commands
+Bitmani PSQL
+1. helm repo add bitnami https://charts.bitnami.com/bitnami
+2. helm repo list - to see added repo
+3. helm repo remove bitnami - if want to remove repo
+2. helm pull bitnami/postgresql
+3. Extract tar file
+4. Update values
+5. helm install psql postgresql (Creating release)
+6. helm list (check releases)
+7. kubectl logs pods/psql-postgresql-0 (check pod logs)
+
+
+Django
+1. helm repo add ju4t https://charts.labdoc.cc/
+2. helm pull ju4u/django
+3. Extract tar file
+4. Update values
