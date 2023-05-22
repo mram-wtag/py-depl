@@ -1,0 +1,51 @@
+version: '3.1'
+
+services:
+  app:
+    image: mokhlesur96/dj:9ca75ce64a62b7f11929ab24747a47a95d154433
+    container_name: py-depl
+    #    build:
+    #      context: .
+    ports:
+      - 8000:8000
+    restart: always
+    networks:
+      - py-app
+      - py-db
+
+
+  database:
+    image: postgres
+    container_name: go-api-db-svc
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=core
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - ${PWD}/database/data/:/var/lib/postgresql/data/
+    networks:
+      - py-db
+      - py-app
+
+  nginx:
+    image: nginx
+    container_name: nginx-proxy
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - py-app
+
+
+networks:
+  py-app:
+    driver: bridge
+  py-db:
+    driver: bridge
+
+
