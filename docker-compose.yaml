@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   app:
-    image: mokhlesur96/dj:9ca75ce64a62b7f11929ab24747a47a95d154433
+    image: mokhlesur96/dj:626b748ab309bf3ef5a7ff86ba74b17c5025c33b
     container_name: py-depl
     #    build:
     #      context: .
