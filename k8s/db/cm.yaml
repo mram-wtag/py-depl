@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: py-db-cm
+
+data:
+  POSTGRES_DB: "py_db"

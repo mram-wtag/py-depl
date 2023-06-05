@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "postgresql.fullname" . }}
+  labels:
+    app: {{ template "postgresql.name" . }}
+    chart: {{ template "postgresql.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  serviceName: {{ template "postgresql.fullname" . }}
+  selector:
+    matchLabels:
+      app: {{ template "postgresql.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "postgresql.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccount: {{ template "postgresql.fullname" . }}
+      containers:
+      - name: {{ template "postgresql.fullname" . }}
+        image: "{{ .Values.image }}:{{ .Values.imageTag}}"
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command: ['su-exec', 'postgres', 'pg_ctl', 'stop']
+        args:
+          {{- range $key, $value := default dict .Values.postgresConfig }}
+          - -c
+          - '{{ $key | snakecase }}={{ $value }}'
+          {{- end }}
+{{ if .Values.tls.enabled }}
+          - -l
+{{ end }}
+        env:
+        - name: POSTGRES_USER
+          value: {{ default "postgres" .Values.postgresUser | quote }}
+          # Required for pg_isready in the health probes.
+        - name: PGUSER
+          value: {{ default "postgres" .Values.postgresUser | quote }}
+        - name: POSTGRES_DB
+          value: {{ default "" .Values.postgresDatabase | quote }}
+        - name: POSTGRES_INITDB_ARGS
+          value: {{ default "" .Values.postgresInitdbArgs | quote }}
+        - name: PGDATA
+          value: {{ .Values.persistence.mountPath }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "postgresql.secretName" . }}
+              key: postgres-password
+        - name: POD_IP
+          valueFrom: { fieldRef: { fieldPath: status.podIP } }
+        ports:
+        - name: postgresql
+          containerPort: 5432
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec pg_isready --host $POD_IP
+          initialDelaySeconds: 120
+          timeoutSeconds: 5
+          failureThreshold: 6
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec pg_isready --host $POD_IP
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          periodSeconds: 5
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - name: data
+          mountPath: {{ .Values.persistence.mountPath }}
+          subPath: {{ .Values.persistence.subPath }}
+{{ if .Values.tls.enabled }}
+      initContainers:
+        - name: copy-tls-certs
+          image: busybox
+          command: ['sh', '/scripts/copy-certs.sh']
+          env:
+          - name: PGDATA
+            value: {{ .Values.persistence.mountPath }}
+          volumeMounts:
+          - name: data
+            mountPath: {{ .Values.persistence.mountPath }}
+            subPath: {{ .Values.persistence.subPath }}
+          - name: tls-scripts
+            mountPath: '/scripts'
+          - name: tls-certificates
+            mountPath: '/tls-certs'
+{{ end }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.existingClaim | default (include "postgresql.fullname" .) }}
+{{ if .Values.tls.enabled }}
+      - name: tls-scripts
+        configMap:
+          name: {{ template "postgresql.fullname" . }}-tls-scripts
+          defaultMode: 0744
+      - name: tls-certificates
+        secret:
+          secretName: {{ template "postgresql.fullname" . }}-tls-certificates
+{{ end }}

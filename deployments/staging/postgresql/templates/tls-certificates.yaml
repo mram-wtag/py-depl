@@ -1,0 +1,15 @@
+{{ if .Values.tls.enabled }}
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ template "postgresql.fullname" . }}-tls-certificates
+  labels:
+    app: {{ template "postgresql.name" . }}
+    chart: {{ template "postgresql.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  server.crt: {{ .Values.tls.crt | quote }}
+  server.key: {{ .Values.tls.key | quote }}
+{{ end }}

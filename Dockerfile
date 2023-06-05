@@ -5,8 +5,12 @@ FROM python:3.9.6-alpine
 WORKDIR /app
 
 # set environment variables
+
 ENV PYTHONDONTWRITEBYTECODE 1
+#disables the creation of bytecode files (.pyc)
+
 ENV PYTHONUNBUFFERED 1
+#the output is immediately flushed
 
 # install dependencies
 RUN apk update \

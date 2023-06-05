@@ -1,0 +1,79 @@
+image:
+  # image config
+  repository: mokhlesur96/dj
+  tag: 9b8c6f0934937ba26b784c95773be048209b0e8b
+  pullPolicy: Always
+
+configmap:
+  # django environment
+  data:
+    DJANGO_SETTINGS_MODULE: config.settings.production
+    DATABASE_URL:
+
+pvc:
+  created: false
+
+
+djangoServer:
+  replicaCount: 1
+
+  command: ["gunicorn", "--workers", "1", "--bind", ":8000",
+            "--log-level", "INFO", "config.wsgi"]
+
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  hpa:
+    enabled: false
+
+  ingress:
+    enabled: false
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths: []
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+
+
+
+collectstaticJob:
+  enabled: false
+
+migrateJob:
+  enabled: true

@@ -1,0 +1,28 @@
+{{ if .Values.tls.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "postgresql.fullname" . }}-tls-scripts
+  labels:
+    app: {{ template "postgresql.name" . }}
+    chart: {{ template "postgresql.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  copy-certs.sh: |-
+    #!bin/sh
+
+    set -x
+
+    if [ -f /tls-certs/server.crt -a -f /tls-certs/server.key ]; then
+      cat /tls-certs/server.crt > "${PGDATA}/server.crt"
+      cat /tls-certs/server.key > "${PGDATA}/server.key"
+
+      chmod 600 "${PGDATA}/server.crt" "${PGDATA}/server.key"
+
+      sed -i 's/host /hostssl /g' "$PGDATA"/pg_hba.conf
+    else
+      echo "/tls-certs/server.crt or /tls-certs/server.key not found, disabling TLS."
+      sed -i 's/hostssl /host /g' "$PGDATA"/pg_hba.conf
+    fi
+{{ end }}

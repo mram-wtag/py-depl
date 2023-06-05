@@ -1,0 +1,51 @@
+## postgres image repository
+image: "postgres"
+## postgres image version
+## ref: https://hub.docker.com/r/library/postgres/tags/
+##
+imageTag: "9.6.9-alpine"
+
+## Create a database user
+## Default: postgres
+postgresUser: "mahin"
+## Default: random 10 character string
+postgresPassword: "secret12345"
+
+## Create a database
+## Default: the postgres user
+postgresDatabase: "core"
+
+## Specify runtime config parameters as a dict, using camelCase, e.g.
+## {"sharedBuffers": "500MB"}
+## ref: https://www.postgresql.org/docs/current/static/runtime-config.html
+# postgresConfig:
+
+## Persist data to a persistent volume
+persistence:
+  ## database data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  size: 8Gi
+  subPath: "postgresql-db"
+  mountPath: /var/lib/postgresql/data/pgdata
+
+## Configure resource requests and limits
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
+
+service:
+  type: 'ClusterIP'
+
+tls:
+  enabled: false
+#  crt: content
+#  key: content

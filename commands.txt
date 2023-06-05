@@ -7,13 +7,16 @@ Helm Commands
 Bitmani PSQL
 1. helm repo add bitnami https://charts.bitnami.com/bitnami
 2. helm repo list - to see added repo
+3. helm repo update
 3. helm repo remove bitnami - if want to remove repo
+4. helm search repo bitnami - see everything bitnami has
 2. helm pull bitnami/postgresql
 3. Extract tar file
 4. Update values
 5. helm install psql postgresql (Creating release)
 6. helm list (check releases)
 7. kubectl logs pods/psql-postgresql-0 (check pod logs)
+9. helm uninstall psql - remove release
 
 
 Django
